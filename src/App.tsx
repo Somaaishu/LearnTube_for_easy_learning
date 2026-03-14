@@ -14,6 +14,8 @@ import ITCoursesPage from "@/pages/ITCoursesPage";
 import NonITCoursesPage from "@/pages/NonITCoursesPage";
 import CourseDetail from "@/pages/CourseDetail";
 import TopicLearning from "@/pages/TopicLearning";
+import Profile from "@/pages/Profile";
+import Leaderboard from "@/pages/Leaderboard";
 import NotFound from "@/pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -35,6 +37,8 @@ const AppRoutes = () => (
       <Route path="/courses/non-it" element={<ProtectedRoute><NonITCoursesPage /></ProtectedRoute>} />
       <Route path="/course/:courseId" element={<ProtectedRoute><CourseDetail /></ProtectedRoute>} />
       <Route path="/course/:courseId/topic/:topicId" element={<ProtectedRoute><TopicLearning /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </>
