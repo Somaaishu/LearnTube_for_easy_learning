@@ -16,7 +16,7 @@ const CreateAccount = () => {
     if (password !== confirm) { setError('Passwords do not match.'); return; }
     if (password.length < 6) { setError('Password must be at least 6 characters.'); return; }
     if (signup(name, email, password)) {
-      navigate('/dashboard-home');
+      navigate('/login', { state: { message: 'Account created successfully! Please login.' } });
     } else {
       setError('An account with this email already exists.');
     }

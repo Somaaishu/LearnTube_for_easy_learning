@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
 const Login = () => {
@@ -8,6 +8,8 @@ const Login = () => {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const successMessage = (location.state as any)?.message;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -22,6 +24,7 @@ const Login = () => {
     <div className="min-h-screen pt-24 px-6 flex items-center justify-center">
       <div className="glass-card w-full max-w-md animate-fade-in">
         <h1 className="text-3xl font-display font-bold gradient-text mb-6 text-center">Welcome Back</h1>
+        {successMessage && <p className="text-center text-green-400 mb-4 text-sm">{successMessage}</p>}
         {error && <p className="text-center text-destructive mb-4 text-sm">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
