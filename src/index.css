@@ -78,9 +78,9 @@
   }
 
   .glass-card:hover {
-    background: hsla(200, 30%, 22%, 0.5);
+    background: hsla(0, 0%, 100%, 0.8);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px 0 hsla(200, 50%, 5%, 0.5);
+    box-shadow: 0 12px 40px 0 hsla(220, 20%, 50%, 0.12);
   }
 
   .glass-nav {
