@@ -96,8 +96,8 @@
   }
 
   .glass-input:focus {
-    border-color: hsl(249 75% 64%);
-    box-shadow: 0 0 0 3px hsla(249, 75%, 64%, 0.2);
+    border-color: hsl(245 58% 62%);
+    box-shadow: 0 0 0 3px hsla(245, 58%, 62%, 0.15);
   }
 
   .gradient-text {
