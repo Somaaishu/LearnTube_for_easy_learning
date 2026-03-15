@@ -49,19 +49,19 @@ const AppRoutes = () => (
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <ThemeProvider>
-        <AuthProvider>
-          <ProgressProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <ProgressProvider>
+          <TooltipProvider>
             <BrowserRouter>
               <AppRoutes />
+              <Toaster />
+              <Sonner />
             </BrowserRouter>
-          </ProgressProvider>
-        </AuthProvider>
-      </ThemeProvider>
-    </TooltipProvider>
+          </TooltipProvider>
+        </ProgressProvider>
+      </AuthProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
