@@ -3,14 +3,14 @@ import { useProgress } from '@/contexts/ProgressContext';
 import { itCourses } from '@/data/itCourses';
 import { nonItCourses } from '@/data/nonItCourses';
 import { Link } from 'react-router-dom';
-import { User, BookOpen, Trophy, Bookmark, Flame } from 'lucide-react';
+import { User, BookOpen, Trophy, Bookmark } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 
 const Profile = () => {
   const { user } = useAuth();
   const {
-    progress, bookmarks, streak,
-    getCompletedCoursesCount, getQuizzesPassed, getPoints, getCourseProgress,
+    progress, bookmarks,
+    getCompletedCoursesCount, getQuizzesPassed, getCourseProgress,
   } = useProgress();
 
   const allCourses = [...itCourses, ...nonItCourses];
@@ -31,19 +31,14 @@ const Profile = () => {
           </div>
           <h1 className="text-3xl font-display font-bold mb-1">{user?.name || 'Learner'}</h1>
           <p className="text-muted-foreground">{user?.email}</p>
-          <div className="flex items-center justify-center gap-2 mt-3">
-            <Flame className="w-5 h-5 text-accent" />
-            <span className="text-accent font-semibold">{streak} Day Streak</span>
-          </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {/* Stats - only 3 cards, no points or streak */}
+        <div className="grid grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Courses Enrolled', value: enrolledCourses.length, icon: '📚' },
             { label: 'Courses Completed', value: completedCourses.length, icon: '🎓' },
             { label: 'Quizzes Passed', value: getQuizzesPassed(), icon: '✅' },
-            { label: 'Points Earned', value: getPoints(), icon: '⭐' },
           ].map(s => (
             <div key={s.label} className="glass-card text-center">
               <div className="text-2xl mb-2">{s.icon}</div>

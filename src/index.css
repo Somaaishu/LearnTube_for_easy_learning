@@ -6,49 +6,93 @@
 
 @layer base {
   :root {
-    --background: 220 20% 96%;
-    --foreground: 220 20% 18%;
+    --background: 30 30% 97%;
+    --foreground: 240 10% 20%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 20% 18%;
+    --card-foreground: 240 10% 20%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 20% 18%;
+    --popover-foreground: 240 10% 20%;
 
-    --primary: 245 58% 62%;
+    --primary: 260 50% 70%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 200 60% 55%;
+    --secondary: 190 45% 72%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 220 14% 90%;
-    --muted-foreground: 220 10% 46%;
+    --muted: 240 10% 92%;
+    --muted-foreground: 240 5% 50%;
 
-    --accent: 330 60% 65%;
+    --accent: 340 45% 75%;
     --accent-foreground: 0 0% 100%;
 
-    --destructive: 0 65% 55%;
+    --destructive: 0 55% 65%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 220 13% 88%;
-    --input: 220 13% 91%;
-    --ring: 245 58% 62%;
+    --border: 240 10% 90%;
+    --input: 240 10% 93%;
+    --ring: 260 50% 70%;
 
     --radius: 0.75rem;
 
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 220 20% 18%;
-    --sidebar-primary: 245 58% 62%;
+    --sidebar-foreground: 240 10% 20%;
+    --sidebar-primary: 260 50% 70%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 220 14% 94%;
-    --sidebar-accent-foreground: 220 20% 18%;
-    --sidebar-border: 220 13% 88%;
-    --sidebar-ring: 245 58% 62%;
+    --sidebar-accent: 240 10% 95%;
+    --sidebar-accent-foreground: 240 10% 20%;
+    --sidebar-border: 240 10% 90%;
+    --sidebar-ring: 260 50% 70%;
 
-    --gradient-bg: linear-gradient(135deg, hsl(220 20% 96%), hsl(230 25% 94%), hsl(245 20% 95%));
-    --glass-bg: hsla(0, 0%, 100%, 0.65);
-    --glass-border: hsla(220, 20%, 80%, 0.4);
-    --glass-shadow: 0 8px 32px 0 hsla(220, 20%, 50%, 0.08);
+    --gradient-bg: linear-gradient(135deg, hsl(30 30% 97%), hsl(260 20% 96%), hsl(190 20% 96%));
+    --glass-bg: hsla(0, 0%, 100%, 0.7);
+    --glass-border: hsla(240, 10%, 85%, 0.4);
+    --glass-shadow: 0 8px 32px 0 hsla(240, 10%, 50%, 0.06);
+  }
+
+  .dark {
+    --background: 240 15% 12%;
+    --foreground: 30 20% 92%;
+
+    --card: 240 15% 16%;
+    --card-foreground: 30 20% 92%;
+
+    --popover: 240 15% 16%;
+    --popover-foreground: 30 20% 92%;
+
+    --primary: 260 50% 72%;
+    --primary-foreground: 240 15% 10%;
+
+    --secondary: 190 45% 65%;
+    --secondary-foreground: 240 15% 10%;
+
+    --muted: 240 10% 22%;
+    --muted-foreground: 240 5% 60%;
+
+    --accent: 340 45% 72%;
+    --accent-foreground: 240 15% 10%;
+
+    --destructive: 0 55% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 240 10% 24%;
+    --input: 240 10% 20%;
+    --ring: 260 50% 72%;
+
+    --sidebar-background: 240 15% 14%;
+    --sidebar-foreground: 30 20% 92%;
+    --sidebar-primary: 260 50% 72%;
+    --sidebar-primary-foreground: 240 15% 10%;
+    --sidebar-accent: 240 10% 20%;
+    --sidebar-accent-foreground: 30 20% 92%;
+    --sidebar-border: 240 10% 24%;
+    --sidebar-ring: 260 50% 72%;
+
+    --gradient-bg: linear-gradient(135deg, hsl(240 15% 12%), hsl(260 15% 14%), hsl(240 12% 13%));
+    --glass-bg: hsla(240, 15%, 18%, 0.7);
+    --glass-border: hsla(240, 10%, 30%, 0.5);
+    --glass-shadow: 0 8px 32px 0 hsla(240, 15%, 5%, 0.2);
   }
 }
 
@@ -61,6 +105,7 @@
     @apply bg-background text-foreground font-body;
     background: var(--gradient-bg);
     min-height: 100vh;
+    transition: background 0.3s ease, color 0.3s ease;
   }
 }
 
@@ -78,9 +123,12 @@
   }
 
   .glass-card:hover {
-    background: hsla(0, 0%, 100%, 0.8);
     transform: translateY(-2px);
-    box-shadow: 0 12px 40px 0 hsla(220, 20%, 50%, 0.12);
+    box-shadow: 0 12px 40px 0 hsla(260, 30%, 50%, 0.1);
+  }
+
+  .dark .glass-card:hover {
+    box-shadow: 0 12px 40px 0 hsla(260, 30%, 20%, 0.3);
   }
 
   .glass-nav {
@@ -96,12 +144,12 @@
   }
 
   .glass-input:focus {
-    border-color: hsl(245 58% 62%);
-    box-shadow: 0 0 0 3px hsla(245, 58%, 62%, 0.15);
+    border-color: hsl(var(--primary));
+    box-shadow: 0 0 0 3px hsla(260, 50%, 70%, 0.15);
   }
 
   .gradient-text {
-    background: linear-gradient(135deg, hsl(245 58% 62%), hsl(200 60% 55%), hsl(330 60% 65%));
+    background: linear-gradient(135deg, hsl(260 50% 70%), hsl(190 45% 72%), hsl(340 45% 75%));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -109,35 +157,35 @@
 
   .btn-primary {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    background: linear-gradient(135deg, hsl(245 58% 62%), hsl(245 50% 55%));
+    background: linear-gradient(135deg, hsl(260 50% 70%), hsl(260 45% 65%));
     color: white;
   }
 
   .btn-primary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px hsla(245, 58%, 62%, 0.25);
+    box-shadow: 0 6px 20px hsla(260, 50%, 70%, 0.3);
   }
 
   .btn-secondary {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    background: linear-gradient(135deg, hsl(200 60% 55%), hsl(200 55% 48%));
+    background: linear-gradient(135deg, hsl(190 45% 72%), hsl(190 40% 65%));
     color: white;
   }
 
   .btn-secondary:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px hsla(200, 60%, 55%, 0.25);
+    box-shadow: 0 6px 20px hsla(190, 45%, 72%, 0.3);
   }
 
   .btn-accent {
     @apply px-6 py-3 rounded-lg font-semibold transition-all duration-300;
-    background: linear-gradient(135deg, hsl(330 60% 65%), hsl(330 55% 58%));
+    background: linear-gradient(135deg, hsl(340 45% 75%), hsl(340 40% 68%));
     color: white;
   }
 
   .btn-accent:hover {
     transform: translateY(-1px);
-    box-shadow: 0 6px 20px hsla(330, 60%, 65%, 0.25);
+    box-shadow: 0 6px 20px hsla(340, 45%, 75%, 0.3);
   }
 
   .btn-outline-glass {
@@ -145,7 +193,6 @@
   }
 
   .btn-outline-glass:hover {
-    background: hsla(220, 20%, 92%, 0.8);
     transform: translateY(-1px);
   }
 }

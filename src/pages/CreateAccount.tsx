@@ -25,7 +25,8 @@ const CreateAccount = () => {
   return (
     <div className="min-h-screen pt-24 px-6 flex items-center justify-center">
       <div className="glass-card w-full max-w-md animate-fade-in">
-        <h1 className="text-3xl font-display font-bold gradient-text mb-6 text-center">Create Account</h1>
+        <h1 className="text-3xl font-display font-bold gradient-text mb-2 text-center">Get Started</h1>
+        <p className="text-center text-muted-foreground text-sm mb-6">Create your SkillNova account</p>
         {error && <p className="text-center text-destructive mb-4 text-sm">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
