@@ -28,9 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     if (users.find((u: any) => u.email === email)) return false;
     users.push({ name, email, password });
     localStorage.setItem('skillnova_users', JSON.stringify(users));
-    const userData = { name, email };
-    localStorage.setItem('skillnova_user', JSON.stringify(userData));
-    setUser(userData);
+    // Do NOT auto-login on signup
     return true;
   };
 

@@ -1,35 +1,50 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
-import { User, Menu, X } from 'lucide-react';
+import { useTheme } from '@/contexts/ThemeContext';
+import { User, Menu, X, Sun, Moon, ChevronLeft } from 'lucide-react';
 import { useState } from 'react';
 
 const Navbar = () => {
   const { isAuthenticated, user, logout } = useAuth();
+  const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
     <nav className="glass-nav fixed top-0 left-0 right-0 z-50 px-6 py-4">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
-        <Link to="/" className="text-2xl font-display font-bold gradient-text">
-          SkillNova
-        </Link>
+        <div className="flex items-center gap-3">
+          {isAuthenticated && (
+            <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground transition-colors">
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+          )}
+          <Link to={isAuthenticated ? "/dashboard-home" : "/"} className="text-2xl font-display font-bold gradient-text">
+            SkillNova
+          </Link>
+        </div>
         <div className="hidden md:flex items-center gap-6">
-          <Link to="/" className="text-muted-foreground hover:text-foreground transition-colors">Home</Link>
           {isAuthenticated && (
             <>
               <Link to="/dashboard-home" className="text-muted-foreground hover:text-foreground transition-colors">Dashboard</Link>
               <Link to="/courses/it" className="text-muted-foreground hover:text-foreground transition-colors">Courses</Link>
-              <Link to="/leaderboard" className="text-muted-foreground hover:text-foreground transition-colors">Leaderboard</Link>
             </>
           )}
-          <Link to="/about" className="text-muted-foreground hover:text-foreground transition-colors">About</Link>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={toggleTheme}
+            className="p-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-all"
+            aria-label="Toggle theme"
+          >
+            {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
+          </button>
           {isAuthenticated ? (
             <>
               <Link to="/profile" className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
-                <User className="w-4 h-4" />
+                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
+                  <User className="w-4 h-4 text-primary" />
+                </div>
                 <span className="hidden sm:block">{user?.name}</span>
               </Link>
               <button onClick={() => { logout(); navigate('/'); }} className="btn-outline-glass text-sm px-4 py-2">Logout</button>
@@ -47,16 +62,13 @@ const Navbar = () => {
       </div>
       {mobileOpen && (
         <div className="md:hidden mt-4 space-y-2 pb-4">
-          <Link to="/" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">Home</Link>
           {isAuthenticated && (
             <>
               <Link to="/dashboard-home" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">Dashboard</Link>
               <Link to="/courses/it" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">Courses</Link>
-              <Link to="/leaderboard" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">Leaderboard</Link>
               <Link to="/profile" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">Profile</Link>
             </>
           )}
-          <Link to="/about" onClick={() => setMobileOpen(false)} className="block py-2 text-muted-foreground hover:text-foreground">About</Link>
         </div>
       )}
     </nav>

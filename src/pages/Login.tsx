@@ -23,8 +23,9 @@ const Login = () => {
   return (
     <div className="min-h-screen pt-24 px-6 flex items-center justify-center">
       <div className="glass-card w-full max-w-md animate-fade-in">
-        <h1 className="text-3xl font-display font-bold gradient-text mb-6 text-center">Welcome Back</h1>
-        {successMessage && <p className="text-center text-green-400 mb-4 text-sm">{successMessage}</p>}
+        <h1 className="text-3xl font-display font-bold gradient-text mb-2 text-center">Welcome Back</h1>
+        <p className="text-center text-muted-foreground text-sm mb-6">Login to continue learning</p>
+        {successMessage && <p className="text-center text-secondary mb-4 text-sm font-medium">{successMessage}</p>}
         {error && <p className="text-center text-destructive mb-4 text-sm">{error}</p>}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
