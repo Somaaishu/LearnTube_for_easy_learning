@@ -13,7 +13,7 @@ const CourseDetail = () => {
   const course = [...itCourses, ...nonItCourses].find(c => c.id === courseId);
   const {
     isTopicUnlocked, progress, isCourseCompleted, getCourseProgress,
-    toggleBookmark, isBookmarked, addReview, getReview,
+    toggleBookmark, isBookmarked, addReview, getReview, getWatchPercent,
   } = useProgress();
 
   const [rating, setRating] = useState(0);
@@ -33,7 +33,7 @@ const CourseDetail = () => {
 ║                                              ║
 ║          CERTIFICATE OF COMPLETION           ║
 ║                                              ║
-║              SkillNova Academy               ║
+║              LearnTube Academy               ║
 ║                                              ║
 ║  This certifies that                         ║
 ║                                              ║
@@ -51,7 +51,7 @@ const CourseDetail = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `SkillNova-Certificate-${course.title.replace(/\s+/g, '-')}.txt`;
+    a.download = `LearnTube-Certificate-${course.title.replace(/\s+/g, '-')}.txt`;
     a.click();
     URL.revokeObjectURL(url);
   };
@@ -75,7 +75,7 @@ const CourseDetail = () => {
               <div className="flex gap-4 text-sm text-muted-foreground">
                 <span className="capitalize">{course.level}</span>
                 <span>{course.modules.length} modules</span>
-                <span>{allTopicIds.length} topics</span>
+                <span>{allTopicIds.length} videos</span>
               </div>
             </div>
             <button onClick={() => toggleBookmark(course.id)} className="text-muted-foreground hover:text-primary transition-colors">
@@ -93,13 +93,13 @@ const CourseDetail = () => {
         {completed && (
           <div className="glass-card text-center mb-8 border border-green-500/30">
             <h2 className="text-2xl font-display font-bold mb-2">Course Completed 🎉</h2>
-            <p className="text-muted-foreground mb-4">Congratulations! You've completed all topics and quizzes.</p>
+            <p className="text-muted-foreground mb-4">Congratulations! You've watched all videos.</p>
             <div className="glass-card inline-block px-8 py-6 border border-primary/30 mb-4">
               <p className="text-sm text-muted-foreground">Certificate of Completion</p>
               <p className="text-xl font-display font-bold gradient-text mt-1">{course.title}</p>
               <p className="text-sm text-muted-foreground mt-1">Awarded to {user?.name}</p>
               <p className="text-xs text-muted-foreground">Date: {new Date().toLocaleDateString()}</p>
-              <p className="text-xs text-muted-foreground">SkillNova Education Platform</p>
+              <p className="text-xs text-muted-foreground">LearnTube Education Platform</p>
             </div>
             <div>
               <button onClick={handleDownloadCertificate} className="btn-primary inline-flex items-center gap-2">
@@ -115,22 +115,22 @@ const CourseDetail = () => {
             <div className="space-y-3">
               {mod.topics.map((topic) => {
                 const unlocked = isTopicUnlocked(course.id, topic.id, allTopicIds);
-                const passed = progress[course.id]?.[topic.id]?.quizPassed;
-                const score = progress[course.id]?.[topic.id]?.score;
+                const wp = getWatchPercent(course.id, topic.id);
+                const topicCompleted = wp >= 80;
                 return (
                   <div key={topic.id} className={`glass-card flex items-center justify-between ${!unlocked ? 'opacity-50' : ''}`}>
                     <div className="flex items-center gap-3">
-                      {passed ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
+                      {topicCompleted ? <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
                         : unlocked ? <Circle className="w-5 h-5 text-primary shrink-0" />
                         : <Lock className="w-5 h-5 text-muted-foreground shrink-0" />}
                       <div>
                         <p className="font-medium">{topic.title}</p>
-                        {passed && score !== undefined && <p className="text-xs text-green-400">Passed with {score}%</p>}
+                        {wp > 0 && <p className="text-xs text-muted-foreground">{wp}% watched</p>}
                       </div>
                     </div>
                     {unlocked && (
-                      <Link to={`/course/${course.id}/topic/${topic.id}`} className={passed ? 'btn-outline-glass text-sm px-4 py-2' : 'btn-primary text-sm px-4 py-2'}>
-                        {passed ? 'Review' : 'Start'}
+                      <Link to={`/course/${course.id}/topic/${topic.id}`} className={topicCompleted ? 'btn-outline-glass text-sm px-4 py-2' : 'btn-primary text-sm px-4 py-2'}>
+                        {topicCompleted ? 'Rewatch' : wp > 0 ? 'Continue' : 'Watch'}
                       </Link>
                     )}
                   </div>

@@ -20,28 +20,15 @@ const TopicLearning = () => {
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [watchPercent, setWatchPercent] = useState(0);
 
-  if (!course) return <div className="min-h-screen pt-24 px-6 text-center">Course not found.</div>;
-
-  const allTopics = course.modules.flatMap(m => m.topics);
+  const allTopics = course?.modules.flatMap(m => m.topics) || [];
   const topicIndex = allTopics.findIndex(t => t.id === topicId);
-  const topic = allTopics[topicIndex];
+  const topic = topicIndex >= 0 ? allTopics[topicIndex] : null;
 
-  if (!topic) return <div className="min-h-screen pt-24 px-6 text-center">Topic not found.</div>;
-
-  const videoId = getYouTubeId(topic.videoUrl);
-  const savedPercent = progress[course.id]?.[topic.id]?.watchPercent || 0;
+  const videoId = topic ? getYouTubeId(topic.videoUrl) : null;
+  const savedPercent = course && topic ? (progress[course.id]?.[topic.id]?.watchPercent || 0) : 0;
   const currentPercent = Math.max(watchPercent, savedPercent);
   const completed = currentPercent >= 80;
-  const nextTopicId = topicIndex < allTopics.length - 1 ? allTopics[topicIndex + 1].id : null;
-
-  // Load YouTube IFrame API
-  useEffect(() => {
-    if (!(window as any).YT) {
-      const tag = document.createElement('script');
-      tag.src = 'https://www.youtube.com/iframe_api';
-      document.head.appendChild(tag);
-    }
-  }, []);
+  const nextTopicId = topic && topicIndex < allTopics.length - 1 ? allTopics[topicIndex + 1].id : null;
 
   const trackProgress = useCallback(() => {
     if (!playerRef.current) return;
@@ -58,8 +45,17 @@ const TopicLearning = () => {
     } catch {}
   }, [courseId, topicId, updateWatchProgress]);
 
+  // Load YouTube IFrame API
   useEffect(() => {
-    if (!videoId) return;
+    if (!(window as any).YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!videoId || !topicId) return;
 
     const initPlayer = () => {
       if (playerRef.current) {
@@ -73,7 +69,6 @@ const TopicLearning = () => {
         events: {
           onStateChange: (event: any) => {
             if (event.data === 1) {
-              // Playing
               if (intervalRef.current) clearInterval(intervalRef.current);
               intervalRef.current = setInterval(trackProgress, 5000);
             } else {
@@ -96,13 +91,20 @@ const TopicLearning = () => {
     };
   }, [videoId, topicId, trackProgress]);
 
+  // Reset watch percent when topic changes
+  useEffect(() => {
+    setWatchPercent(0);
+  }, [topicId]);
+
+  if (!course) return <div className="min-h-screen pt-24 px-6 text-center">Course not found.</div>;
+  if (!topic) return <div className="min-h-screen pt-24 px-6 text-center">Topic not found.</div>;
+
   return (
     <div className="min-h-screen pt-24 px-6">
       <div className="max-w-4xl mx-auto py-12">
         <Link to={`/course/${courseId}`} className="text-primary hover:underline text-sm mb-6 inline-block">← Back to {course.title}</Link>
 
         <div className="animate-fade-in">
-          {/* Video Player */}
           <div className="glass-card mb-6">
             <h1 className="text-3xl font-display font-bold mb-4">{topic.title}</h1>
             <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
@@ -119,7 +121,6 @@ const TopicLearning = () => {
             )}
           </div>
 
-          {/* Explanation */}
           <div className="glass-card mb-6">
             <h2 className="text-xl font-display font-semibold mb-3">📖 Overview</h2>
             <p className="text-foreground leading-relaxed whitespace-pre-line">{topic.explanation}</p>
@@ -154,7 +155,6 @@ const TopicLearning = () => {
             </ul>
           </div>
 
-          {/* Navigation */}
           <div className="flex gap-4 justify-center flex-wrap">
             {completed && nextTopicId && (
               <button onClick={() => navigate(`/course/${courseId}/topic/${nextTopicId}`)} className="btn-primary text-lg px-8 py-4">
