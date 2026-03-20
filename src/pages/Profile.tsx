@@ -10,21 +10,20 @@ const Profile = () => {
   const { user } = useAuth();
   const {
     progress, bookmarks,
-    getCompletedCoursesCount, getQuizzesPassed, getCourseProgress,
+    getCompletedCoursesCount, getVideosWatched, getCourseProgress,
   } = useProgress();
 
   const allCourses = [...itCourses, ...nonItCourses];
   const enrolledCourses = allCourses.filter(c => progress[c.id]);
   const completedCourses = allCourses.filter(c => {
     const allTopicIds = c.modules.flatMap(m => m.topics.map(t => t.id));
-    return allTopicIds.length > 0 && allTopicIds.every(tid => progress[c.id]?.[tid]?.quizPassed);
+    return allTopicIds.length > 0 && allTopicIds.every(tid => (progress[c.id]?.[tid]?.watchPercent || 0) >= 80);
   });
   const bookmarkedCourses = allCourses.filter(c => bookmarks.includes(c.id));
 
   return (
     <div className="min-h-screen pt-24 px-6">
       <div className="max-w-5xl mx-auto py-12">
-        {/* Profile Header */}
         <div className="glass-card text-center mb-8 animate-fade-in">
           <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center mx-auto mb-4">
             <User className="w-12 h-12 text-primary" />
@@ -33,12 +32,11 @@ const Profile = () => {
           <p className="text-muted-foreground">{user?.email}</p>
         </div>
 
-        {/* Stats - only 3 cards, no points or streak */}
         <div className="grid grid-cols-3 gap-4 mb-8">
           {[
             { label: 'Courses Enrolled', value: enrolledCourses.length, icon: '📚' },
             { label: 'Courses Completed', value: completedCourses.length, icon: '🎓' },
-            { label: 'Quizzes Passed', value: getQuizzesPassed(), icon: '✅' },
+            { label: 'Videos Watched', value: getVideosWatched(), icon: '▶️' },
           ].map(s => (
             <div key={s.label} className="glass-card text-center">
               <div className="text-2xl mb-2">{s.icon}</div>
@@ -48,7 +46,6 @@ const Profile = () => {
           ))}
         </div>
 
-        {/* Learning Progress */}
         {enrolledCourses.length > 0 && (
           <div className="glass-card mb-8">
             <h2 className="text-xl font-display font-semibold mb-4 flex items-center gap-2">
@@ -58,7 +55,7 @@ const Profile = () => {
               {enrolledCourses.map(course => {
                 const allTopicIds = course.modules.flatMap(m => m.topics.map(t => t.id));
                 const pct = getCourseProgress(course.id, allTopicIds);
-                const completedTopics = allTopicIds.filter(tid => progress[course.id]?.[tid]?.quizPassed).length;
+                const completedTopics = allTopicIds.filter(tid => (progress[course.id]?.[tid]?.watchPercent || 0) >= 80).length;
                 return (
                   <Link key={course.id} to={`/course/${course.id}`} className="block hover:bg-muted/20 rounded-lg p-3 transition-colors">
                     <div className="flex justify-between items-center mb-2">
@@ -66,7 +63,7 @@ const Profile = () => {
                       <span className="text-sm text-muted-foreground">{pct}%</span>
                     </div>
                     <Progress value={pct} className="h-2 mb-1" />
-                    <p className="text-xs text-muted-foreground">Topics completed: {completedTopics} / {allTopicIds.length}</p>
+                    <p className="text-xs text-muted-foreground">Videos completed: {completedTopics} / {allTopicIds.length}</p>
                   </Link>
                 );
               })}
@@ -74,7 +71,6 @@ const Profile = () => {
           </div>
         )}
 
-        {/* Certificates */}
         {completedCourses.length > 0 && (
           <div className="glass-card mb-8">
             <h2 className="text-xl font-display font-semibold mb-4 flex items-center gap-2">
@@ -86,14 +82,13 @@ const Profile = () => {
                   <p className="text-sm text-muted-foreground">Certificate of Completion</p>
                   <p className="text-lg font-display font-bold gradient-text mt-1">{course.title}</p>
                   <p className="text-xs text-muted-foreground mt-1">Awarded to {user?.name}</p>
-                  <p className="text-xs text-muted-foreground">SkillNova Education Platform</p>
+                  <p className="text-xs text-muted-foreground">LearnTube Education Platform</p>
                 </div>
               ))}
             </div>
           </div>
         )}
 
-        {/* Bookmarked Courses */}
         {bookmarkedCourses.length > 0 && (
           <div className="glass-card">
             <h2 className="text-xl font-display font-semibold mb-4 flex items-center gap-2">

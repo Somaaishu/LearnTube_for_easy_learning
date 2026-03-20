@@ -1,163 +1,171 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { itCourses } from '@/data/itCourses';
 import { nonItCourses } from '@/data/nonItCourses';
 import { useProgress } from '@/contexts/ProgressContext';
+import { Progress } from '@/components/ui/progress';
+
+function getYouTubeId(url: string): string | null {
+  const match = url.match(/(?:v=|\/embed\/|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
 
 const TopicLearning = () => {
   const { courseId, topicId } = useParams();
   const navigate = useNavigate();
-  const { markQuizPassed, progress } = useProgress();
+  const { updateWatchProgress, progress } = useProgress();
   const allCourses = [...itCourses, ...nonItCourses];
   const course = allCourses.find(c => c.id === courseId);
+  const playerRef = useRef<any>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const [watchPercent, setWatchPercent] = useState(0);
 
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
-  const [submitted, setSubmitted] = useState(false);
+  const allTopics = course?.modules.flatMap(m => m.topics) || [];
+  const topicIndex = allTopics.findIndex(t => t.id === topicId);
+  const topic = topicIndex >= 0 ? allTopics[topicIndex] : null;
+
+  const videoId = topic ? getYouTubeId(topic.videoUrl) : null;
+  const savedPercent = course && topic ? (progress[course.id]?.[topic.id]?.watchPercent || 0) : 0;
+  const currentPercent = Math.max(watchPercent, savedPercent);
+  const completed = currentPercent >= 80;
+  const nextTopicId = topic && topicIndex < allTopics.length - 1 ? allTopics[topicIndex + 1].id : null;
+
+  const trackProgress = useCallback(() => {
+    if (!playerRef.current) return;
+    try {
+      const duration = playerRef.current.getDuration?.();
+      const currentTime = playerRef.current.getCurrentTime?.();
+      if (duration && currentTime) {
+        const pct = Math.round((currentTime / duration) * 100);
+        setWatchPercent(pct);
+        if (courseId && topicId) {
+          updateWatchProgress(courseId, topicId, pct);
+        }
+      }
+    } catch {}
+  }, [courseId, topicId, updateWatchProgress]);
+
+  // Load YouTube IFrame API
+  useEffect(() => {
+    if (!(window as any).YT) {
+      const tag = document.createElement('script');
+      tag.src = 'https://www.youtube.com/iframe_api';
+      document.head.appendChild(tag);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!videoId || !topicId) return;
+
+    const initPlayer = () => {
+      if (playerRef.current) {
+        playerRef.current.destroy?.();
+      }
+      playerRef.current = new (window as any).YT.Player(`yt-player-${topicId}`, {
+        videoId,
+        width: '100%',
+        height: '100%',
+        playerVars: { rel: 0, modestbranding: 1 },
+        events: {
+          onStateChange: (event: any) => {
+            if (event.data === 1) {
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              intervalRef.current = setInterval(trackProgress, 5000);
+            } else {
+              if (intervalRef.current) clearInterval(intervalRef.current);
+              trackProgress();
+            }
+          },
+        },
+      });
+    };
+
+    if ((window as any).YT?.Player) {
+      initPlayer();
+    } else {
+      (window as any).onYouTubeIframeAPIReady = initPlayer;
+    }
+
+    return () => {
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [videoId, topicId, trackProgress]);
+
+  // Reset watch percent when topic changes
+  useEffect(() => {
+    setWatchPercent(0);
+  }, [topicId]);
 
   if (!course) return <div className="min-h-screen pt-24 px-6 text-center">Course not found.</div>;
-
-  const allTopics = course.modules.flatMap(m => m.topics);
-  const topicIndex = allTopics.findIndex(t => t.id === topicId);
-  const topic = allTopics[topicIndex];
-
   if (!topic) return <div className="min-h-screen pt-24 px-6 text-center">Topic not found.</div>;
-
-  const quizPassed = progress[course.id]?.[topic.id]?.quizPassed;
-  const totalQuestions = topic.quiz.length;
-  const correctCount = Object.entries(answers).filter(([i, a]) => topic.quiz[Number(i)].correctAnswer === a).length;
-  const scorePercent = Math.round((correctCount / totalQuestions) * 100);
-  const passed = scorePercent >= 60;
-
-  const handleSubmitQuiz = () => {
-    setSubmitted(true);
-    if (passed) {
-      markQuizPassed(course.id, topic.id, scorePercent);
-    }
-  };
-
-  const handleRetry = () => {
-    setAnswers({});
-    setSubmitted(false);
-  };
-
-  const nextTopicId = topicIndex < allTopics.length - 1 ? allTopics[topicIndex + 1].id : null;
 
   return (
     <div className="min-h-screen pt-24 px-6">
       <div className="max-w-4xl mx-auto py-12">
         <Link to={`/course/${courseId}`} className="text-primary hover:underline text-sm mb-6 inline-block">← Back to {course.title}</Link>
 
-        {!showQuiz ? (
-          <div className="animate-fade-in">
-            <div className="glass-card mb-6">
-              <h1 className="text-3xl font-display font-bold mb-4">{topic.title}</h1>
-              <p className="text-foreground leading-relaxed whitespace-pre-line">{topic.explanation}</p>
+        <div className="animate-fade-in">
+          <div className="glass-card mb-6">
+            <h1 className="text-3xl font-display font-bold mb-4">{topic.title}</h1>
+            <div className="aspect-video rounded-lg overflow-hidden bg-black mb-4">
+              <div id={`yt-player-${topicId}`} className="w-full h-full" />
             </div>
-
-            {topic.examples.length > 0 && (
-              <div className="glass-card mb-6">
-                <h2 className="text-xl font-display font-semibold mb-3">📌 Examples</h2>
-                <ul className="space-y-2">
-                  {topic.examples.map((ex, i) => (
-                    <li key={i} className="text-muted-foreground flex gap-2"><span className="text-primary">•</span> {ex}</li>
-                  ))}
-                </ul>
-              </div>
+            <div className="flex items-center gap-4">
+              <Progress value={currentPercent} className="h-3 flex-1" />
+              <span className={`text-sm font-semibold ${completed ? 'text-green-400' : 'text-muted-foreground'}`}>
+                {currentPercent}% watched
+              </span>
+            </div>
+            {completed && (
+              <p className="text-green-400 text-sm mt-2">✓ Video completed! Next topic unlocked.</p>
             )}
+          </div>
 
-            {topic.codeExample && (
-              <div className="glass-card mb-6">
-                <h2 className="text-xl font-display font-semibold mb-3">💻 Code Example</h2>
-                <pre className="bg-background/50 rounded-lg p-4 overflow-x-auto text-sm font-mono text-foreground">
-                  <code>{topic.codeExample}</code>
-                </pre>
-              </div>
-            )}
+          <div className="glass-card mb-6">
+            <h2 className="text-xl font-display font-semibold mb-3">📖 Overview</h2>
+            <p className="text-foreground leading-relaxed whitespace-pre-line">{topic.explanation}</p>
+          </div>
 
+          {topic.examples.length > 0 && (
             <div className="glass-card mb-6">
-              <h2 className="text-xl font-display font-semibold mb-3">🔑 Key Concepts Learned</h2>
+              <h2 className="text-xl font-display font-semibold mb-3">📌 Examples</h2>
               <ul className="space-y-2">
-                {topic.keyConceptsLearned.map((kc, i) => (
-                  <li key={i} className="flex gap-2 text-muted-foreground"><span className="text-accent">✓</span> {kc}</li>
+                {topic.examples.map((ex, i) => (
+                  <li key={i} className="text-muted-foreground flex gap-2"><span className="text-primary">•</span> {ex}</li>
                 ))}
               </ul>
             </div>
+          )}
 
-            <div className="text-center">
-              <button onClick={() => setShowQuiz(true)} className="btn-primary text-lg px-8 py-4">
-                {quizPassed ? 'Review Quiz' : 'Take Quiz →'}
-              </button>
-            </div>
-          </div>
-        ) : (
-          <div className="animate-fade-in">
+          {topic.codeExample && (
             <div className="glass-card mb-6">
-              <h2 className="text-2xl font-display font-bold mb-2">📝 Quiz: {topic.title}</h2>
-              <p className="text-muted-foreground text-sm">Score at least 60% to unlock the next topic.</p>
+              <h2 className="text-xl font-display font-semibold mb-3">💻 Code Example</h2>
+              <pre className="bg-background/50 rounded-lg p-4 overflow-x-auto text-sm font-mono text-foreground">
+                <code>{topic.codeExample}</code>
+              </pre>
             </div>
+          )}
 
-            {topic.quiz.map((q, qi) => (
-              <div key={qi} className="glass-card mb-4">
-                <p className="font-semibold mb-3">Q{qi + 1}. {q.question}</p>
-                <div className="space-y-2">
-                  {q.options.map((opt, oi) => {
-                    const selected = answers[qi] === oi;
-                    const isCorrect = q.correctAnswer === oi;
-                    let classes = 'glass-input w-full text-left cursor-pointer flex items-center gap-2';
-                    if (submitted) {
-                      if (isCorrect) classes += ' !border-green-500 bg-green-500/10';
-                      else if (selected && !isCorrect) classes += ' !border-red-500 bg-red-500/10';
-                    } else if (selected) {
-                      classes += ' !border-primary bg-primary/10';
-                    }
-                    return (
-                      <button key={oi} onClick={() => !submitted && setAnswers({ ...answers, [qi]: oi })} className={classes} disabled={submitted}>
-                        <span className="font-semibold text-muted-foreground">{String.fromCharCode(65 + oi)}.</span>
-                        <span className="text-foreground">{opt}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-                {submitted && (
-                  <p className={`mt-2 text-sm ${answers[qi] === q.correctAnswer ? 'text-green-400' : 'text-red-400'}`}>
-                    {answers[qi] === q.correctAnswer ? '✓ Correct!' : `✗ Incorrect.`} {q.explanation}
-                  </p>
-                )}
-              </div>
-            ))}
+          <div className="glass-card mb-6">
+            <h2 className="text-xl font-display font-semibold mb-3">🔑 Key Concepts Learned</h2>
+            <ul className="space-y-2">
+              {topic.keyConceptsLearned.map((kc, i) => (
+                <li key={i} className="flex gap-2 text-muted-foreground"><span className="text-accent">✓</span> {kc}</li>
+              ))}
+            </ul>
+          </div>
 
-            {!submitted ? (
-              <div className="text-center">
-                <button onClick={handleSubmitQuiz} disabled={Object.keys(answers).length < totalQuestions} className="btn-primary text-lg px-8 py-4 disabled:opacity-50">
-                  Submit Quiz
-                </button>
-              </div>
-            ) : (
-              <div className="glass-card text-center">
-                <h3 className="text-2xl font-display font-bold mb-2">
-                  {passed ? '🎉 Congratulations!' : '😔 Not Quite'}
-                </h3>
-                <p className="text-xl mb-2">Score: <span className={passed ? 'text-green-400' : 'text-red-400'}>{scorePercent}%</span></p>
-                <p className="text-muted-foreground mb-4">
-                  {passed ? 'You passed! The next topic is now unlocked.' : 'You need at least 60% to pass. Try again!'}
-                </p>
-                <div className="flex gap-4 justify-center flex-wrap">
-                  {!passed && <button onClick={handleRetry} className="btn-accent">Retry Quiz</button>}
-                  {passed && nextTopicId && (
-                    <button onClick={() => navigate(`/course/${courseId}/topic/${nextTopicId}`)} className="btn-primary">
-                      Next Topic →
-                    </button>
-                  )}
-                  {passed && !nextTopicId && (
-                    <Link to={`/course/${courseId}`} className="btn-primary">View Course Completion</Link>
-                  )}
-                  <button onClick={() => setShowQuiz(false)} className="btn-outline-glass">Back to Lesson</button>
-                </div>
-              </div>
+          <div className="flex gap-4 justify-center flex-wrap">
+            {completed && nextTopicId && (
+              <button onClick={() => navigate(`/course/${courseId}/topic/${nextTopicId}`)} className="btn-primary text-lg px-8 py-4">
+                Next Topic →
+              </button>
+            )}
+            {completed && !nextTopicId && (
+              <Link to={`/course/${courseId}`} className="btn-primary text-lg px-8 py-4">View Course Completion</Link>
             )}
           </div>
-        )}
+        </div>
       </div>
     </div>
   );

@@ -20,7 +20,7 @@ const Navbar = () => {
             </button>
           )}
           <Link to={isAuthenticated ? "/dashboard-home" : "/"} className="text-2xl font-display font-bold gradient-text">
-            SkillNova
+            LearnTube
           </Link>
         </div>
         <div className="hidden md:flex items-center gap-6">
