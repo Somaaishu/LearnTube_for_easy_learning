@@ -1,10 +1,3 @@
-export interface QuizQuestion {
-  question: string;
-  options: string[];
-  correctAnswer: number;
-  explanation: string;
-}
-
 export interface Topic {
   id: string;
   title: string;
@@ -12,7 +5,7 @@ export interface Topic {
   examples: string[];
   codeExample?: string;
   keyConceptsLearned: string[];
-  quiz: QuizQuestion[];
+  videoUrl: string;
 }
 
 export interface Module {
