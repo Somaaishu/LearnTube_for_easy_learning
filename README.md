@@ -2,7 +2,7 @@
 
 ## Project info
 
-**URL**: https://skillnova-your-learning-journey.vercel.app/
+**URL**: https://learntubeforeasylearning.lovable.app
 
 ## How can I edit this code?
 
